@@ -735,7 +735,8 @@ function bouwPrompt(data, subnaam, sel, ex) {
   const isHTML = data.vorm === 'html' || data.vorm === 'beiden';
   const isDocx = data.vorm === 'docx' || data.vorm === 'beiden';
   const lijnen = [];
-  lijnen.push('Je bent docent aan VIVES Hogeschool.');
+  const vakLabel = data.vak ? ' ' + data.vak : '';
+  lijnen.push('Je bent docent' + vakLabel + ' aan VIVES Hogeschool en begeleidt studenten op ' + data.niveau + ' niveau.');
   lijnen.push('Gebruik de VIVES-huisstijl:');
   lijnen.push('- Titels: Calibri 14pt, vet');
   lijnen.push('- Ondertitels: Calibri 12pt, vet');
@@ -818,7 +819,8 @@ function bouwRubricTekst(data) {
   const niv    = (document.querySelector('input[name="rubNiv"]:checked') || {value:'3'}).value;
   const punten = (document.querySelector('input[name="rubPunten"]:checked') || {value:'nee'}).value;
   const lijnen = [];
-  lijnen.push('Je bent docent aan VIVES Hogeschool.');
+  const vakLabelR = data.vak ? ' ' + data.vak : '';
+  lijnen.push('Je bent docent' + vakLabelR + ' aan VIVES Hogeschool en begeleidt studenten op ' + data.niveau + ' niveau.');
   lijnen.push('Gebruik de VIVES-huisstijl: Calibri, VIVES-rood (#e00020), Zand (#efeee9), Zwart (#1e1e1e).');
   lijnen.push('');
   lijnen.push('OPDRACHT: Maak een rubric van het type "' + type + '".');
@@ -899,12 +901,7 @@ document.getElementById('subcatInhoud').addEventListener('change', function() {
 
 </script>
 <script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .catch(e => console.warn('SW fout:', e));
-  });
-}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(e=>console.warn(e));});}
 </script>
 </body>
 </html>
