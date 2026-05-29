@@ -1,10 +1,10 @@
 {
   "name": "ScrIVESOne",
   "short_name": "ScrIVESOne",
-  "description": "Kant-en-klare AI-prompts voor docenten van VIVES Hogeschool",
+  "description": "Promptgenerator voor alle vakken — VIVES Hogeschool",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#efeee9",
+  "background_color": "#e8e6df",
   "theme_color": "#e00020",
   "orientation": "portrait-primary",
   "icons": [
