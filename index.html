@@ -1848,12 +1848,12 @@ let curGroep = null;
 let wizardGroepen = [];
 
 function loadProfiel() {
-  try { const r = localStorage.getItem('scrivesone_profiel'); return r ? JSON.parse(r) : null; }
+  try { const r = localStorage.getItem('onescrives_profiel'); return r ? JSON.parse(r) : null; }
   catch(e) { return null; }
 }
 
 function saveProfiel(p) {
-  try { localStorage.setItem('scrivesone_profiel', JSON.stringify(p)); } catch(e) {}
+  try { localStorage.setItem('onescrives_profiel', JSON.stringify(p)); } catch(e) {}
 }
 
 function showScreen(id) {

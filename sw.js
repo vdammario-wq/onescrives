@@ -1,4 +1,4 @@
-const CACHE = 'scrivesone-v2';
+const CACHE = 'onescrives-v2';
 const ASSETS = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
