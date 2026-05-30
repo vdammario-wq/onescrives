@@ -263,21 +263,21 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     <div class="fc" id="fcStd">
       <div class="fc-title">Standaardgegevens</div>
       <div class="two-col">
-        <div class="fg"><label class="fl">1. Onderwerp van de les of opdracht</label>
+        <div class="fg"><label class="fl">Onderwerp van de les of opdracht</label>
           <input type="text" id="f_onderwerp" placeholder="Bv. De balans, Arbeidsrecht, Zorgethiek..."></div>
-        <div class="fg"><label class="fl">2. Titel van het document</label>
+        <div class="fg"><label class="fl">Titel van het document</label>
           <input type="text" id="f_titel" placeholder="Bv. Oefening 3 — De balans"></div>
       </div>
       <div class="two-col">
-        <div class="fg"><label class="fl">3. Naam van de docent</label>
+        <div class="fg"><label class="fl">Naam van de docent</label>
           <input type="text" id="f_docent" placeholder="Bv. J. Janssen"></div>
-        <div class="fg"><label class="fl">4. Groep / opleiding</label>
+        <div class="fg"><label class="fl">Groep / opleiding</label>
           <input type="text" id="f_groep" placeholder="Bv. 2 Toegepaste economie"></div>
       </div>
       <div class="two-col">
-        <div class="fg"><label class="fl">5. Vak</label>
+        <div class="fg"><label class="fl">Vak</label>
           <input type="text" id="f_vak" placeholder="Bv. Boekhouden, Arbeidsrecht, Zorg en ethiek..."></div>
-        <div class="fg" id="fgNiveau"><label class="fl">6. Opleidingsniveau studenten</label>
+        <div class="fg" id="fgNiveau"><label class="fl">Opleidingsniveau studenten</label>
           <select id="f_niveau">
             <option value="Secundair onderwijs">Secundair onderwijs</option>
             <option value="Graduaat jaar 1">Graduaat jaar 1</option>
@@ -290,7 +290,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
         </div>
       </div>
       <div class="fg">
-        <label class="fl">7. Bijlage beschikbaar?</label>
+        <label class="fl">Bijlage beschikbaar?</label>
         <div class="rg">
           <label class="ri"><input type="radio" name="bijlage" value="nee" checked onchange="onBijlageChange()">
             <span class="rl"><span class="rl-main">Nee</span><span class="rl-desc">Beschrijf het onderwerp in het opmerkingenveld</span></span></label>
@@ -418,7 +418,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
 
     <!-- VORM -->
     <div class="fc" id="fcVorm">
-      <div class="fc-title">8. Vorm van het materiaal</div>
+      <div class="fc-title">Vorm van het materiaal</div>
       <div class="rg rc">
         <label class="ri"><input type="radio" name="vorm" value="docx" checked onchange="onVormChange()">
           <span class="rl"><span class="rl-main">Document (Word, VIVES-stijl)</span>
@@ -445,7 +445,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
 
     <!-- OPLOSSINGSSLEUTEL -->
     <div class="fc" id="fcOpl">
-      <div class="fc-title"><span id="lsdNum">10</span>. Oplossingssleutel genereren?</div>
+      <div class="fc-title">Oplossingssleutel genereren?</div>
       <div class="rg">
         <label class="ri"><input type="radio" name="opl" value="ja" checked>
           <span class="rl"><span class="rl-main">Ja</span><span class="rl-desc">Aparte sleutel (verborgen bij HTML-only)</span></span></label>
@@ -455,8 +455,8 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     </div>
 
     <!-- LESDOELEN -->
-    <div class="fc">
-      <div class="fc-title"><span id="lsdNumLd">11</span>. Wil je lesdoelen opnemen bij het begin van de les?</div>
+    <div class="fc" id="fcLsdoel">
+      <div class="fc-title">Wil je lesdoelen opnemen bij het begin van de les?</div>
       <div class="rg">
         <label class="ri"><input type="radio" name="lsdoel" value="nee" checked><span class="rl-main">Nee</span></label>
         <label class="ri"><input type="radio" name="lsdoel" value="ja"><span class="rl-main">Ja</span></label>
@@ -1411,16 +1411,10 @@ function onVormChange() {
   if (document.getElementById('fcEvaluatie') && !document.getElementById('fcEvaluatie').classList.contains('hidden')) {
     onEvalJaNeeChange();
   }
-  updateLsdNum();
+  updateNummering();
 }
 
-function updateLsdNum() {
-  const verborgen = document.getElementById('fcOpl').classList.contains('hidden');
-  const el  = document.getElementById('lsdNum');
-  const el2 = document.getElementById('lsdNumLd');
-  if (el)  el.textContent  = verborgen ? '9'  : '10';
-  if (el2) el2.textContent = verborgen ? '10' : '11';
-}
+function updateNummering() { /* nummering verwijderd */ }
 
 function checkGemini() {
   const aangevinkt = [...document.querySelectorAll('#subcatInhoud input[type="checkbox"]:checked')].map(c => c.value);
@@ -1727,9 +1721,9 @@ function bouwPrompt(data, subnaam, sel, ex) {
     lijnen.push('  * Links: "VIVES Hogeschool" in zandkleur (#efeee9), vet');
     lijnen.push('  * Midden: "' + (data.titel || subnaam) + '" in wit, vet');
     lijnen.push('  * Rechts: "' + docentKort + ' | ' + (data.groep || '[Groep]') + '" in zandkleur (#efeee9), klein');
-    lijnen.push('- Een dunne rode lijn (#e00020) onderaan de header');
+    lijnen.push('- Onderaan de header: een rode lijn van 1px dik (#e00020), geen witregel of marge tussen de header-inhoud en deze lijn (margin:0; padding:0)');
     lijnen.push('- Een FOOTER onderaan in zwart (#1e1e1e) met:');
-    lijnen.push('  * Een dunne rode lijn (#e00020) bovenaan de footer');
+    lijnen.push('  * Bovenaan de footer: een rode lijn van 1px dik (#e00020), geen witregel of marge tussen de lijn en de footer-inhoud (margin:0; padding-top:0)');
     lijnen.push('  * Links: "Dit document werd aangemaakt via OneScrIVES. AI-gegenereerde inhoud kan fouten bevatten." in lichtgrijs, klein');
     lijnen.push('  * Rechts: "' + (data.titel || subnaam) + ' | ' + (data.groep || '[Groep]') + '" in lichtgrijs, klein');
     lijnen.push('- Een feedbackknop die: fouten markeert in rood, de correcte versie toont in groen, per fout een uitleg geeft, en een eindscore berekent');
@@ -1737,12 +1731,12 @@ function bouwPrompt(data, subnaam, sel, ex) {
   if (isDocx && !isHTML) {
     lijnen.push('');
     lijnen.push('HEADER (enkel op eerste pagina):');
-    lijnen.push('- Rode lijn (#e00020) onderaan de header');
+    lijnen.push('- Rode lijn van exact 1pt dik (#e00020) onderaan de header, direct aansluitend op de tekst zonder witregel (afstand na lijn: 0pt)');
     lijnen.push('- Links: "VIVES Hogeschool" in VIVES-rood (#e00020), vet, Calibri 11pt');
     lijnen.push('- Rechts: "' + (data.groep || '[Groep]') + ' | ' + (data.titel || '[Titel]') + ' | ' + docentKort + '" in lichtgrijs, Calibri 9pt');
     lijnen.push('');
     lijnen.push('FOOTER (op elke pagina):');
-    lijnen.push('- Dunne rode lijn (#e00020) bovenaan de footer');
+    lijnen.push('- Rode lijn van exact 1pt dik (#e00020) bovenaan de footer, direct aansluitend op de footer-tekst zonder witregel (afstand voor lijn: 0pt)');
     lijnen.push('- Links: "Dit document werd aangemaakt via OneScrIVES. AI-gegenereerde inhoud kan fouten bevatten." in lichtgrijs, Calibri 7pt');
     lijnen.push('- Rechts: "' + (data.titel || '[Titel]') + ' | ' + (data.groep || '[Groep]') + ' | p. [paginanummer]" in lichtgrijs, Calibri 7pt');
   }
