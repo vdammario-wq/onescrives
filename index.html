@@ -179,6 +179,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
 
     <div class="val-err" id="w_err" style="display:none;"></div>
     <button class="gen-btn" id="wizardSaveBtn" onclick="opslaanProfiel()">Opslaan en starten</button>
+    <button class="out-btn hidden" id="wizardResetBtn" onclick="resetProfiel()" style="width:100%;margin-top:10px;border-color:#bbb;color:#888;">Profiel volledig wissen en opnieuw beginnen</button>
   </div>
 
   <!-- SCHERM 1 — HOME -->
@@ -313,6 +314,9 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     <!-- DUUR -->
     <div class="fc hidden" id="fcDuur">
       <div class="fc-title">Duur van de les of opdracht</div>
+      <div style="background:#efeee9;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#555;">
+        Aanbevolen — als je de duur invult, stemt de AI het aantal en type oefeningen hierop af.
+      </div>
       <div class="fg">
         <label class="fl">Type</label>
         <div class="rg">
@@ -360,7 +364,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     <!-- OPBOUW VAN DE LES -->
     <div class="fc hidden" id="fcIntroTheorie">
       <div class="fc-title">Opbouw van de les</div>
-      <p class="it-hint" style="margin:-12px 0 16px;">Je kunt intro en theorie allebei tegelijk aanbieden.</p>
+      <p class="it-hint" style="margin:-12px 0 16px;">Wil je vóór de oefeningen ook een korte intro of theorie aanbieden? Vink aan wat je wenst — je kunt intro en theorie allebei tegelijk kiezen.</p>
       <div class="fg">
         <label class="cb-item" style="display:inline-flex;"><input type="checkbox" id="chkIntro" onchange="toggleCe('introDetails',this.checked)"> Intro aanbieden</label>
         <div class="ce hidden" id="introDetails" style="margin-top:10px;">
@@ -432,17 +436,6 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
       </div>
     </div>
 
-    <!-- PUNTENSYSTEEM -->
-    <div class="fc hidden" id="fcPunten">
-      <div class="fc-title">Puntensysteem (optioneel)</div>
-      <div class="two-col">
-        <div class="fg"><label class="fl">Punten per correct antwoord</label>
-          <input type="text" inputmode="decimal" id="f_pItem" placeholder="Bv. 1" style="max-width:100px;"></div>
-        <div class="fg"><label class="fl">Aftrek kleine fout</label>
-          <input type="text" inputmode="decimal" id="f_pKlein" placeholder="Bv. 0,5" style="max-width:100px;"></div>
-      </div>
-    </div>
-
     <!-- OPLOSSINGSSLEUTEL -->
     <div class="fc" id="fcOpl">
       <div class="fc-title">Oplossingssleutel genereren?</div>
@@ -490,23 +483,6 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
           <label class="ri"><input type="radio" name="rubPunten" value="nee" checked><span class="rl-main">Nee</span></label>
           <label class="ri"><input type="radio" name="rubPunten" value="ja"><span class="rl-main">Ja</span></label>
         </div>
-      </div>
-    </div>
-
-    <!-- GEMINI -->
-    <div class="fc hidden" id="fcGemini">
-      <div class="fc-title" id="geminiTitle">Gesprek via Gemini</div>
-      <div class="tip" style="margin-bottom:16px;">
-        <b>Let op:</b> deze prompt is speciaal gemaakt voor <b>Gemini</b>.<br>
-        Kopieer de prompt en plak ze op <b>gemini.google.com</b>.
-      </div>
-      <div id="geminiGesprekVelden">
-        <div class="fg"><label class="fl">Scenario</label>
-          <input type="text" id="f_scenario" placeholder="Bv. sollicitatiegesprek, klachtenbehandeling, vergadering..."></div>
-      </div>
-      <div id="geminiSchrijvenVelden" class="hidden">
-        <div class="fg"><label class="fl">Type tekst</label>
-          <input type="text" id="f_typetekst" placeholder="Bv. e-mail, rapport, argumentatieve tekst..."></div>
       </div>
     </div>
 
@@ -862,7 +838,7 @@ const HC = [
        oefenSub:['Meerkeuzevragen','Open vragen','Invuloefening','Matching','Casusanalyse','Berekening']}
     ]
   },
-  { id:'toets', naam:'Toetsing & Evaluatie', beschr:'Toetsen, exit tickets en peer-evaluatie',
+  { id:'toets', naam:'Toetsing & Evaluatie', beschr:'Toetsen, exit tickets en peer-evaluatie', hasEval:true,
     sub:[
       {id:'toets-mc',       naam:'Meerkeuzetoets',            beschr:'Volledige toets met meerkeuzevragen'},
       {id:'toets-open',     naam:'Open-vragentoets',          beschr:'Redeneren en argumenteren'},
@@ -1315,7 +1291,7 @@ function goForm(hcId, subId) {
 }
 
 function resetFields() {
-  ['f_onderwerp','f_titel','f_docent','f_groep','f_vak','f_opm','f_scenario','f_typetekst'].forEach(id => {
+  ['f_onderwerp','f_titel','f_docent','f_groep','f_vak','f_opm'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
   document.getElementById('f_studiegebied').value = '';
@@ -1331,7 +1307,6 @@ function resetFields() {
   document.querySelector('input[name="opl"][value="ja"]').checked = true;
   document.querySelector('input[name="lsdoel"][value="nee"]').checked = true;
   document.querySelector('input[name="groepN"][value="2"]').checked = true;
-  document.getElementById('fcGemini').classList.add('hidden');
   ['chkIntro','chkTheorie'].forEach(id => { const el=document.getElementById(id); if(el) el.checked=false; });
   document.querySelectorAll('input[name="introT"]').forEach(c => c.checked = (c.value === 'tekst'));
   document.querySelectorAll('input[name="theorieT"]').forEach(c => c.checked = (c.value === 'uitleg'));
@@ -1342,15 +1317,11 @@ function resetFields() {
   document.getElementById('pOut').style.display = 'none';
   document.getElementById('rubOffer').style.display = 'none';
   document.getElementById('valErr').style.display = 'none';
-  const pi=document.getElementById('f_pItem'); if(pi) pi.value='';
-  const pk=document.getElementById('f_pKlein'); if(pk) pk.value='';
 }
 
 function setupForm() {
   const s = curSub;
   const isGroep    = curHC.id === 'groep';
-  const isToets    = curHC.id === 'toets';
-  const isTheo     = curHC.id === 'theo';
   const isLes      = curHC.id === 'les';
   const isZelfstudie = curHC.id === 'zelfstudie';
   const isPraktijk = curHC.id === 'praktijk';
@@ -1377,7 +1348,6 @@ function setupForm() {
   );
   document.getElementById('fcGroep').classList.toggle('hidden', !isGroep);
   document.getElementById('fcIntroTheorie').classList.toggle('hidden', !s.introTheorie);
-  document.getElementById('fcPunten').classList.toggle('hidden', !isTheo && !isToets);
   document.getElementById('fcOpl').classList.toggle('hidden', !!s.hideOpl);
   document.getElementById('fcEvaluatie').classList.toggle('hidden', !hasEval);
   if (hasEval) resetEvaluatie();
@@ -1387,7 +1357,7 @@ function setupForm() {
 }
 
 function cbHTML(naam) {
-  return '<label class="cb-item"><input type="checkbox" value="' + naam + '" onchange="toggleCbStyle(this);checkGemini();"> ' + naam + '</label>';
+  return '<label class="cb-item"><input type="checkbox" value="' + naam + '" onchange="toggleCbStyle(this);"> ' + naam + '</label>';
 }
 
 function toggleCbStyle(cb) { cb.closest('.cb-item').classList.toggle('checked', cb.checked); }
@@ -1416,18 +1386,7 @@ function onVormChange() {
 
 function updateNummering() { /* nummering verwijderd */ }
 
-function checkGemini() {
-  const aangevinkt = [...document.querySelectorAll('#subcatInhoud input[type="checkbox"]:checked')].map(c => c.value);
-  const heeftGesprek  = aangevinkt.some(v => v.includes('Gemini') && v.includes('gesprek'));
-  const heeftSchrijven = aangevinkt.some(v => v.includes('Gemini') && v.includes('tekst'));
-  const heeftGemini = heeftGesprek || heeftSchrijven;
-  document.getElementById('fcGemini').classList.toggle('hidden', !heeftGemini);
-  if (heeftGemini) {
-    document.getElementById('geminiTitle').textContent = heeftGesprek ? 'Gesprek via Gemini' : 'Schrijftutor via Gemini';
-    document.getElementById('geminiGesprekVelden').classList.toggle('hidden', !heeftGesprek);
-    document.getElementById('geminiSchrijvenVelden').classList.toggle('hidden', !heeftSchrijven);
-  }
-}
+
 
 // ═══ EVALUATIE LOGICA ════════════════════════════════════════
 
@@ -1576,15 +1535,22 @@ function getData() {
     lsdoel:       document.querySelector('input[name="lsdoel"]:checked').value,
 
     opm:          document.getElementById('f_opm').value.trim(),
-    groepN:       document.querySelector('input[name="groepN"]:checked').value,
-    pItem:        (document.getElementById('f_pItem') || {value:''}).value.trim(),
-    pKlein:       (document.getElementById('f_pKlein') || {value:''}).value.trim()
+    groepN:       document.querySelector('input[name="groepN"]:checked').value
   };
 }
 
 function generatePrompt() {
   const data = getData();
   document.getElementById('valErr').style.display = 'none';
+
+  // Validatie: onderwerp of bijlage nodig
+  if (!data.onderwerp && data.bijlage === 'nee') {
+    const err = document.getElementById('valErr');
+    err.textContent = 'Vul een onderwerp in, of geef bij "Bijlage beschikbaar?" aan dat je een bijlage meestuurt.';
+    err.style.display = 'block';
+    err.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
 
   const sel = [...document.querySelectorAll('#subcatInhoud input[type="checkbox"]:checked')].map(c => c.value);
   let ex = '';
@@ -1600,8 +1566,6 @@ function generatePrompt() {
     ex += '\n\nTHEORIE:\nBied theorie aan als ' + (tts.length ? tts.join(' en ') : 'uitleg van begrippen') + (to === 'ja' ? ', gevolgd door oefeningen' : '') + '.';
   }
   if (curHC.id === 'groep') ex += '\n\nGROEPSGROOTTE: ' + data.groepN + ' studenten per groep.';
-  if (data.pItem)  ex += '\n\nPUNTENSYSTEEM:\n- Punten per correct antwoord: ' + data.pItem;
-  if (data.pKlein) ex += '\n- Aftrek kleine fout: ' + data.pKlein;
 
   // Evaluatiedata
   const eval_ = getEvalData();
@@ -1614,32 +1578,8 @@ function generatePrompt() {
       generatedPrompt = bouwPrompt(data, curSub.naam, sel, ex);
     }
 
-    const geminiGesprek  = sel.find(v => v.includes('Gemini') && v.includes('gesprek'));
-    const geminiSchrijven = sel.find(v => v.includes('Gemini') && v.includes('tekst'));
-    if (geminiGesprek || geminiSchrijven) {
-      const scenario  = (document.getElementById('f_scenario')  || {value:''}).value.trim();
-      const typetekst = (document.getElementById('f_typetekst') || {value:''}).value.trim();
-      let gp = '';
-      if (geminiGesprek) {
-        gp = 'Je bent een professionele gesprekspartner voor een student van VIVES Hogeschool.\n'
-           + 'Niveau: ' + data.niveau + '.\n'
-           + 'Vak: ' + (data.vak || '[vak]') + '.\n'
-           + (scenario  ? 'Scenario: '  + scenario  + '.\n' : '')
-           + (data.onderwerp ? 'Thema: ' + data.onderwerp + '.\n' : '')
-           + '\nVoer een realistisch gesprek. Reageer na elke beurt op de inhoud en geef concrete feedback: wat ging goed, wat kan beter.';
-      } else {
-        gp = 'Je bent een schrijftutor voor studenten van VIVES Hogeschool.\n'
-           + 'Niveau: ' + data.niveau + '.\n'
-           + 'Vak: ' + (data.vak || '[vak]') + '.\n'
-           + (typetekst ? 'Type tekst: ' + typetekst + '.\n' : '')
-           + (data.onderwerp ? 'Thema: ' + data.onderwerp + '.\n' : '')
-           + '\nDe student stuurt je een tekst. Geef: 1. een positief element, 2. verbeterpunten met uitleg, 3. de gecorrigeerde versie. Wacht op de tekst.';
-      }
-      generatedPrompt += '\n\n' + '─'.repeat(50) + '\nGEMINI-PROMPT — plak hieronder op gemini.google.com\n' + '─'.repeat(50) + '\n\n' + gp;
-      document.getElementById('pUitleg').textContent = 'Twee prompts gegenereerd. De tweede is speciaal voor Gemini (gemini.google.com).';
-    } else {
-      document.getElementById('pUitleg').textContent = 'Kopieer de prompt en plak ze in Claude, ChatGPT, Gemini of een andere AI-tool.';
-    }
+    document.getElementById('pUitleg').textContent = 'Kopieer de prompt en plak ze in Claude, ChatGPT, Gemini of een andere AI-tool.';
+
 
     document.getElementById('pText').textContent = generatedPrompt;
     document.getElementById('pOut').style.display = 'block';
@@ -1703,7 +1643,7 @@ function bouwPrompt(data, subnaam, sel, ex) {
     lijnen.push('  Duur: ' + duurTekst + ' Stem het aantal en type oefeningen af op deze duur.');
   }
 
-  const selGefilterd = sel.filter(v => !v.includes('Gemini'));
+  const selGefilterd = sel;
   if (selGefilterd.length > 0) {
     lijnen.push('  Voeg de volgende oefenvormen toe: ' + selGefilterd.join(', ') + '.');
   }
@@ -1721,24 +1661,24 @@ function bouwPrompt(data, subnaam, sel, ex) {
     lijnen.push('  * Links: "VIVES Hogeschool" in zandkleur (#efeee9), vet');
     lijnen.push('  * Midden: "' + (data.titel || subnaam) + '" in wit, vet');
     lijnen.push('  * Rechts: "' + docentKort + ' | ' + (data.groep || '[Groep]') + '" in zandkleur (#efeee9), klein');
-    lijnen.push('- Onderaan de header: een rode lijn van 1px dik (#e00020), geen witregel of marge tussen de header-inhoud en deze lijn (margin:0; padding:0)');
+    lijnen.push('- Onderaan de header: een rode lijn van 1px dik (#e00020). BELANGRIJK: geen enkele marge of padding tussen de header-inhoud en deze lijn. De lijn sluit direct aan op de header, geen witruimte.');
     lijnen.push('- Een FOOTER onderaan in zwart (#1e1e1e) met:');
-    lijnen.push('  * Bovenaan de footer: een rode lijn van 1px dik (#e00020), geen witregel of marge tussen de lijn en de footer-inhoud (margin:0; padding-top:0)');
+    lijnen.push('  * Bovenaan de footer: een rode lijn van 1px dik (#e00020). BELANGRIJK: geen enkele marge of padding tussen de lijn en de footer-tekst. De tekst sluit direct aan onder de lijn, geen witruimte.');
     lijnen.push('  * Links: "Dit document werd aangemaakt via OneScrIVES. AI-gegenereerde inhoud kan fouten bevatten." in lichtgrijs, klein');
-    lijnen.push('  * Rechts: "' + (data.titel || subnaam) + ' | ' + (data.groep || '[Groep]') + '" in lichtgrijs, klein');
+    lijnen.push('  * Rechts: "' + (data.vak || data.titel || subnaam) + ' | ' + (data.groep || '[Groep]') + '" in lichtgrijs, klein');
     lijnen.push('- Een feedbackknop die: fouten markeert in rood, de correcte versie toont in groen, per fout een uitleg geeft, en een eindscore berekent');
   }
-  if (isDocx && !isHTML) {
+  if (isDocx) {
     lijnen.push('');
     lijnen.push('HEADER (enkel op eerste pagina):');
-    lijnen.push('- Rode lijn van exact 1pt dik (#e00020) onderaan de header, direct aansluitend op de tekst zonder witregel (afstand na lijn: 0pt)');
+    lijnen.push('- Rode lijn van exact 0,5pt dik (#e00020) onderaan de header. Afstand voor en na de lijn: 0pt. Geen witruimte tussen header-tekst en lijn.');
     lijnen.push('- Links: "VIVES Hogeschool" in VIVES-rood (#e00020), vet, Calibri 11pt');
     lijnen.push('- Rechts: "' + (data.groep || '[Groep]') + ' | ' + (data.titel || '[Titel]') + ' | ' + docentKort + '" in lichtgrijs, Calibri 9pt');
     lijnen.push('');
     lijnen.push('FOOTER (op elke pagina):');
-    lijnen.push('- Rode lijn van exact 1pt dik (#e00020) bovenaan de footer, direct aansluitend op de footer-tekst zonder witregel (afstand voor lijn: 0pt)');
+    lijnen.push('- Rode lijn van exact 0,5pt dik (#e00020) bovenaan de footer. Afstand voor en na de lijn: 0pt. Geen witruimte tussen de lijn en de footer-tekst.');
     lijnen.push('- Links: "Dit document werd aangemaakt via OneScrIVES. AI-gegenereerde inhoud kan fouten bevatten." in lichtgrijs, Calibri 7pt');
-    lijnen.push('- Rechts: "' + (data.titel || '[Titel]') + ' | ' + (data.groep || '[Groep]') + ' | p. [paginanummer]" in lichtgrijs, Calibri 7pt');
+    lijnen.push('- Rechts: "' + (data.vak || '[Vak]') + ' | ' + (data.groep || '[Groep]') + ' | p. [paginanummer]" in lichtgrijs, Calibri 7pt');
   }
   const fcOpl = document.getElementById('fcOpl');
   if (fcOpl && !fcOpl.classList.contains('hidden') && data.opl === 'ja') {
@@ -1863,6 +1803,7 @@ function initApp() {
   if (!profiel || !profiel.naam) {
     document.getElementById('wizardTitel').textContent = 'Welkom bij OneScrIVES';
     document.getElementById('wizardSaveBtn').textContent = 'Opslaan en starten';
+    document.getElementById('wizardResetBtn').classList.add('hidden');
     wizardGroepen = [];
     renderWizardGroepen();
     initWizardDropdowns();
@@ -1920,7 +1861,19 @@ function openProfielEdit() {
   initWizardDropdowns();
   document.getElementById('wizardTitel').textContent = 'Profiel bewerken';
   document.getElementById('wizardSaveBtn').textContent = 'Wijzigingen opslaan';
+  document.getElementById('wizardResetBtn').classList.remove('hidden');
   showScreen('s0');
+}
+
+function resetProfiel() {
+  if (!confirm('Weet je zeker dat je je volledige profiel wilt wissen? Al je groepen worden verwijderd. Dit kan niet ongedaan worden gemaakt.')) return;
+  try { localStorage.removeItem('onescrives_profiel'); } catch(e) {}
+  profiel = null;
+  curGroep = null;
+  wizardGroepen = [];
+  document.getElementById('btnBewerkProfiel').classList.add('hidden');
+  document.getElementById('w_naam').value = '';
+  initApp();
 }
 
 // Wizard dropdowns
@@ -2061,10 +2014,6 @@ document.getElementById('mainGrid').innerHTML = HC.map(h =>
 ).join('');
 
 initStudiegebiedDropdown();
-
-document.getElementById('subcatInhoud').addEventListener('change', function() {
-  checkGemini();
-});
 
 initApp();
 
