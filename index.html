@@ -202,8 +202,9 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
         <p>Kies een groep om direct te starten, of blader hieronder door de categorieën.</p>
       </div>
       <div class="profiel-grid" id="groepenGrid"></div>
-      <div style="margin:4px 0 20px;">
+      <div style="margin:4px 0 20px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="out-btn" onclick="doorgaanZonderGroep()">Doorgaan zonder groep</button>
+        <button class="out-btn" onclick="doorgaanZonderGroepTaalvak()">Doorgaan zonder groep (taalvak)</button>
       </div>
       <hr class="groep-scheidingslijn">
     </div>
@@ -278,13 +279,13 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     </div>
     <div class="two-col">
       <div class="fg"><label class="fl" for="f_taal">7. Taal van het document</label>
-        <select id="f_taal" onchange="onTaalChange()"><option value="">— Kies taal —</option><option value="Nederlands">Nederlands</option><option value="Frans">Frans</option><option value="Spaans">Spaans</option><option value="Engels">Engels</option><option value="Duits">Duits</option></select>
+        <select id="f_taal" onchange="scrOnTaalChange()"><option value="">— Kies taal —</option><option value="Nederlands">Nederlands</option><option value="Frans">Frans</option><option value="Spaans">Spaans</option><option value="Engels">Engels</option><option value="Duits">Duits</option></select>
         <div class="taal-note" id="taalNote">Uitleg en theorie worden afgestemd op het niveau van vraag 6.</div>
       </div>
       <div class="fg"><label class="fl">8. Gebruik je een bijlage?</label>
         <div class="rg">
-          <label class="ri"><input type="radio" name="scr_bijlage" value="nee" checked onchange="onBijlageChange('nee')"><span class="rl"><span class="rl-main">Nee</span></span></label>
-          <label class="ri"><input type="radio" name="scr_bijlage" value="ja" onchange="onBijlageChange('ja')"><span class="rl"><span class="rl-main">Ja</span></span></label>
+          <label class="ri"><input type="radio" name="scr_bijlage" value="nee" checked onchange="scrOnBijlageChange('nee')"><span class="rl"><span class="rl-main">Nee</span></span></label>
+          <label class="ri"><input type="radio" name="scr_bijlage" value="ja" onchange="scrOnBijlageChange('ja')"><span class="rl"><span class="rl-main">Ja</span></span></label>
         </div>
         <div class="fb hidden" id="fbJa">Upload je bijlage samen met deze prompt in je AI-tool. De AI gebruikt de inhoud als basis.</div>
       </div>
@@ -292,9 +293,9 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     <div class="two-col">
       <div class="fg"><label class="fl">9. Vorm van het materiaal</label>
         <div class="rg rc">
-          <label class="ri"><input type="radio" name="scr_vorm" value="document" checked onchange="onVormChange()"><span class="rl"><span class="rl-main">Document (Word, VIVES-stijl)</span></span></label>
-          <label class="ri"><input type="radio" name="scr_vorm" value="html" onchange="onVormChange()"><span class="rl"><span class="rl-main">Interactieve HTML-app</span></span></label>
-          <label class="ri"><input type="radio" name="scr_vorm" value="beiden" onchange="onVormChange()"><span class="rl"><span class="rl-main">Beiden</span></span></label>
+          <label class="ri"><input type="radio" name="scr_vorm" value="document" checked onchange="scrOnVormChange()"><span class="rl"><span class="rl-main">Document (Word, VIVES-stijl)</span></span></label>
+          <label class="ri"><input type="radio" name="scr_vorm" value="html" onchange="scrOnVormChange()"><span class="rl"><span class="rl-main">Interactieve HTML-app</span></span></label>
+          <label class="ri"><input type="radio" name="scr_vorm" value="beiden" onchange="scrOnVormChange()"><span class="rl"><span class="rl-main">Beiden</span></span></label>
         </div>
       </div>
       <div class="fg" id="scr_fcOpl"><label class="fl">10. Oplossingssleutel</label>
@@ -334,16 +335,60 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
 
   <!-- DUUR / OEFENINGEN -->
   <div class="fc hidden" id="scr_fcDuur">
-    <div class="fc-title" id="fcDuurTitle">Tijdsinschatting en oefeningen</div>
-    <div class="fg" id="duurModeRadios">
-      <div class="rg rc">
-        <label class="ri"><input type="radio" name="scr_duurMode" value="duur" checked onchange="onDuurMode()"><span class="rl"><span class="rl-main">De AI bepaalt het aantal oefeningen op basis van de lesduur</span></span></label>
-        <label class="ri"><input type="radio" name="scr_duurMode" value="zelf" onchange="onDuurMode()"><span class="rl"><span class="rl-main">Ik kies zelf het aantal oefeningen en items</span></span></label>
+    <div class="fc-title" id="fcDuurTitle">Duur van de les of opdracht</div>
+    <div style="background:#efeee9;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#555;">
+      Aanbevolen — als je de duur invult, stemt de AI het aantal en type oefeningen hierop af.
+    </div>
+    <div class="fg">
+      <label class="fl">Type</label>
+      <div class="rg">
+        <label class="ri"><input type="radio" name="scr_duurType" value="les" checked onchange="scrOnDuurTypeChange()">
+          <span class="rl"><span class="rl-main">Enkele les</span></span></label>
+        <label class="ri"><input type="radio" name="scr_duurType" value="reeks" onchange="scrOnDuurTypeChange()">
+          <span class="rl"><span class="rl-main">Lessenreeks</span></span></label>
       </div>
     </div>
-    <div id="duurBox"><div class="fg"><label class="fl" for="f_duur">Duur van de les</label>
-      <select id="f_duur" style="max-width:240px;"><option value="">— Kies duur —</option><option value="30 minuten">30 minuten</option><option value="45 minuten">45 minuten</option><option value="1 uur">1 uur</option><option value="1,5 uur">1,5 uur</option><option value="2 uur">2 uur</option><option value="3 uur">3 uur</option><option value="een volledige dag">Een volledige dag</option></select>
-    </div></div>
+    <div id="scr_duurEnkelDetails">
+      <div class="fg">
+        <label class="fl">Duur</label>
+        <div class="rg" style="flex-wrap:wrap;gap:8px;margin-bottom:10px;" id="scr_duurSnelGrid">
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="30" onchange="scrOnDuurSnelChange()"> 30 min</label>
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="45" onchange="scrOnDuurSnelChange()"> 45 min</label>
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="60" onchange="scrOnDuurSnelChange()"> 1 uur</label>
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="90" onchange="scrOnDuurSnelChange()"> 1,5 uur</label>
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="120" onchange="scrOnDuurSnelChange()"> 2 uur</label>
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="180" onchange="scrOnDuurSnelChange()"> 3 uur</label>
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="dag" onchange="scrOnDuurSnelChange()"> Volledige dag</label>
+          <label class="cb-item" style="flex:0 0 auto;"><input type="radio" name="scr_duurSnel" value="zelf" onchange="scrOnDuurSnelChange()"> Zelf invullen</label>
+        </div>
+        <div class="hidden" id="scr_duurZelfDetails" style="display:flex;gap:10px;align-items:center;margin-top:4px;">
+          <input type="number" id="scr_f_duurMin" placeholder="min" min="1" max="599" style="width:80px;">
+          <span style="font-size:13px;color:#666;">minuten &nbsp; of</span>
+          <input type="number" id="scr_f_duurUur" placeholder="uur" min="1" max="24" style="width:70px;">
+          <span style="font-size:13px;color:#666;">uur</span>
+        </div>
+      </div>
+    </div>
+    <div id="scr_duurReeksDetails" class="hidden">
+      <div class="two-col">
+        <div class="fg">
+          <label class="fl">Aantal lessen</label>
+          <input type="number" id="scr_f_reeksAantal" placeholder="Bv. 6" min="2" max="99" style="max-width:100px;">
+        </div>
+        <div class="fg">
+          <label class="fl">Duur per les</label>
+          <input type="text" id="scr_f_reeksDuur" placeholder="Bv. 45 min, 2 uur...">
+        </div>
+      </div>
+    </div>
+
+    <div class="fg" id="duurModeRadios" style="margin-top:18px;">
+      <label class="fl">Aantal oefeningen</label>
+      <div class="rg rc">
+        <label class="ri"><input type="radio" name="scr_duurMode" value="duur" checked onchange="scrOnDuurMode()"><span class="rl"><span class="rl-main">De AI bepaalt het aantal oefeningen op basis van de duur</span></span></label>
+        <label class="ri"><input type="radio" name="scr_duurMode" value="zelf" onchange="scrOnDuurMode()"><span class="rl"><span class="rl-main">Ik kies zelf het aantal oefeningen en items</span></span></label>
+      </div>
+    </div>
     <div class="hidden" id="zelfBox"><div class="two-col">
       <div class="fg"><label class="fl" for="f_nOef">Aantal oefeningen</label><input type="number" id="f_nOef" min="1" max="20" placeholder="Bv. 3" style="max-width:120px;"></div>
       <div class="fg"><label class="fl" for="f_nItems">Items per oefening</label><input type="number" id="f_nItems" min="1" max="50" placeholder="Bv. 10" style="max-width:120px;"></div>
@@ -368,7 +413,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     <div class="fc-title">Opbouw van de les</div>
     <p class="it-hint" style="margin:-12px 0 16px;">Je kunt intro en theorie allebei tegelijk aanbieden.</p>
     <div class="fg">
-      <label class="cb-item" id="chkIntroWrap" style="display:inline-flex;"><input type="checkbox" id="scr_chkIntro" onchange="toggleCe('introDetails',this.checked)"> Intro aanbieden</label>
+      <label class="cb-item" id="chkIntroWrap" style="display:inline-flex;"><input type="checkbox" id="scr_chkIntro" onchange="scrToggleCe('introDetails',this.checked)"> Intro aanbieden</label>
       <div class="ce hidden" id="scr_introDetails" style="margin-top:10px;">
         <div class="two-col">
           <div class="fg"><label class="fl">Type intro</label><p class="it-hint">Je kunt beide vormen aanvinken.</p><div class="rg rc" style="margin-top:6px;">
@@ -383,7 +428,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
       </div>
     </div>
     <div class="fg">
-      <label class="cb-item" style="display:inline-flex;"><input type="checkbox" id="scr_chkTheorie" onchange="toggleCe('theorieDetails',this.checked)"> Theorie aanbieden</label>
+      <label class="cb-item" style="display:inline-flex;"><input type="checkbox" id="scr_chkTheorie" onchange="scrToggleCe('theorieDetails',this.checked)"> Theorie aanbieden</label>
       <div class="ce hidden" id="scr_theorieDetails" style="margin-top:10px;">
         <div class="two-col">
           <div class="fg"><label class="fl">Type theorie</label><p class="it-hint">Je kunt beide vormen aanvinken.</p><div class="rg rc" style="margin-top:6px;">
@@ -534,7 +579,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     <div class="fg"><textarea id="scr_f_opm" class="remark" rows="3" placeholder="Vul hier andere opmerkingen in of beschrijf zelf je oefening"></textarea></div>
   </div>
 
-  <button class="gen-btn" onclick="generatePrompt()">Genereer mijn prompt</button>
+  <button class="gen-btn" onclick="scrGeneratePrompt()">Genereer mijn prompt</button>
 
   <!-- PROMPT OUTPUT -->
   <div class="p-out" id="scr_pOut">
@@ -542,7 +587,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
     <p class="p-uitleg" id="scr_pUitleg"></p>
     <div class="p-text" id="scr_pText"></div>
     <div class="p-actions">
-      <button class="copy-btn" id="scr_copyBtn" onclick="copyText('pText','copyBtn','Kopieer prompt')">Kopieer prompt</button>
+      <button class="copy-btn" id="scr_copyBtn" onclick="copyText('scr_pText','scr_copyBtn','Kopieer prompt')">Kopieer prompt</button>
       <button class="out-btn" onclick="scrBackFromForm()">Nieuwe prompt</button>
     </div>
   </div>
@@ -551,14 +596,14 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
   <div class="rub-offer" id="scr_rubOffer">
     <h4>Wil je ook een rubric genereren?</h4>
     <p>Op basis van de gegevens die je al hebt ingevuld, kan ik een beoordelingsrubric toevoegen voor deze opdracht.</p>
-    <button class="out-btn" onclick="toonRubricInline()">Ja, genereer ook een rubric</button>
+    <button class="out-btn" onclick="scrToonRubricInline()">Ja, genereer ook een rubric</button>
   </div>
 
   <!-- RUBRIC INLINE -->
   <div class="fc hidden" id="rubInlineCard">
     <div class="fc-title">Rubric — extra parameters</div>
     <div id="rubInlineInhoud"></div>
-    <button class="gen-btn" style="margin-top:16px;" onclick="genRubricPrompt('ri_')">Genereer rubric-prompt</button>
+    <button class="gen-btn" style="margin-top:16px;" onclick="scrGenRubricPrompt('ri_')">Genereer rubric-prompt</button>
   </div>
   <div class="p-out" id="rubOut">
     <h3>Jouw rubric-prompt — klaar om te plakken</h3>
@@ -2216,6 +2261,11 @@ function doorgaanZonderGroep() {
   document.getElementById('wijzigGroepBalk').classList.remove('hidden');
 }
 
+function doorgaanZonderGroepTaalvak() {
+  curGroep = null;
+  openScrIVES(null);
+}
+
 function wisselGroep() {
   toonHome();
 }
@@ -2627,11 +2677,11 @@ function scrSetupForm(){
   // Duur
   const hideDuur=s.hideDuur||(s.special==='rubric');
   document.getElementById('scr_fcDuur').classList.toggle('hidden',hideDuur);
-  // Bij duurOnly: verberg de keuzeradio's, toon enkel de lesduur selector
+  // Bij duurOnly: verberg de keuzeradio's voor aantal oefeningen, toon enkel de duurkeuze
   const isDuurOnly = !!s.duurOnly;
   document.getElementById('duurModeRadios').classList.toggle('hidden', isDuurOnly);
-  document.getElementById('fcDuurTitle').textContent = isDuurOnly ? 'Duur van de les(senreeks)' : 'Tijdsinschatting en oefeningen';
-  document.getElementById('duurBox').classList.remove('hidden');
+  document.getElementById('fcDuurTitle').textContent = 'Duur van de les of opdracht';
+  scrResetDuur();
   document.getElementById('zelfBox').classList.add('hidden');
   if(!isDuurOnly) scrOnDuurMode();
 
@@ -2692,9 +2742,8 @@ function scrResetFields(){
   hide('fbJa');
   document.querySelector('input[name="scr_vorm"][value="document"]').checked=true;
   ['input[name="scr_opl"][value="geen"]','input[name="scr_lsd"][value="nee"]','input[name="scr_duurMode"][value="duur"]'].forEach(s=>{const el=document.querySelector(s);if(el)el.checked=true;});
-  document.getElementById('duurBox').classList.remove('hidden');
+  scrResetDuur();
   document.getElementById('zelfBox').classList.add('hidden');
-  const fd=document.getElementById('f_duur');if(fd)fd.value='';
   ['f_nOef','f_nItems','f_leden','scr_f_pItem','scr_f_pKlein','scr_f_pGroot'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('fcGemini').classList.add('hidden');
   ['f_scenario','f_typetekst'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -2757,7 +2806,59 @@ function scrOnTaalChange(){const t=document.getElementById('f_taal').value;docum
 function scrOnBijlageChange(v){document.getElementById('fbJa').classList.toggle('hidden',v==='nee');}
 function scrOnVormChange(){const v=document.querySelector('input[name="scr_vorm"]:checked')?.value;document.getElementById('scr_fcOpl').classList.toggle('hidden',v==='html'||!!scrCurSub?.hideOpl);scrUpdateLsdNum();}
 function scrUpdateLsdNum(){const verborgen=document.getElementById('scr_fcOpl').classList.contains('hidden');const el=document.getElementById('lsdNum');if(el)el.textContent=verborgen?'10':'11';}
-function scrOnDuurMode(){const m=document.querySelector('input[name="scr_duurMode"]:checked')?.value;document.getElementById('duurBox').classList.toggle('hidden',m!=='duur');document.getElementById('zelfBox').classList.toggle('hidden',m!=='zelf');}
+function scrOnDuurMode(){
+  const m=document.querySelector('input[name="scr_duurMode"]:checked')?.value;
+  document.getElementById('zelfBox').classList.toggle('hidden',m!=='zelf');
+}
+
+function scrOnDuurTypeChange(){
+  const type=document.querySelector('input[name="scr_duurType"]:checked').value;
+  document.getElementById('scr_duurEnkelDetails').classList.toggle('hidden',type==='reeks');
+  document.getElementById('scr_duurReeksDetails').classList.toggle('hidden',type!=='reeks');
+}
+
+function scrOnDuurSnelChange(){
+  const val=document.querySelector('input[name="scr_duurSnel"]:checked').value;
+  document.getElementById('scr_duurZelfDetails').classList.toggle('hidden',val!=='zelf');
+  document.querySelectorAll('#scr_duurSnelGrid .cb-item').forEach(el=>{
+    const inp=el.querySelector('input');
+    el.classList.toggle('checked',inp&&inp.checked);
+  });
+}
+
+function scrGetDuurTekst(){
+  const type=document.querySelector('input[name="scr_duurType"]:checked')?.value;
+  if(type==='reeks'){
+    const aantal=(document.getElementById('scr_f_reeksAantal')||{value:''}).value.trim();
+    const duur=(document.getElementById('scr_f_reeksDuur')||{value:''}).value.trim();
+    if(aantal&&duur) return 'Lessenreeks van '+aantal+' lessen van telkens '+duur+'.';
+    if(aantal) return 'Lessenreeks van '+aantal+' lessen.';
+    return '';
+  }
+  const snel=document.querySelector('input[name="scr_duurSnel"]:checked');
+  if(!snel) return '';
+  const v=snel.value;
+  if(v==='zelf'){
+    const min=(document.getElementById('scr_f_duurMin')||{value:''}).value.trim();
+    const uur=(document.getElementById('scr_f_duurUur')||{value:''}).value.trim();
+    if(min&&uur) return uur+' uur en '+min+' minuten.';
+    if(min) return min+' minuten.';
+    if(uur) return uur+' uur.';
+    return '';
+  }
+  const map={'30':'30 minuten','45':'45 minuten','60':'1 uur','90':'1,5 uur','120':'2 uur','180':'3 uur','dag':'een volledige dag'};
+  return map[v]||'';
+}
+
+function scrResetDuur(){
+  const t=document.querySelector('input[name="scr_duurType"][value="les"]');if(t)t.checked=true;
+  document.getElementById('scr_duurEnkelDetails').classList.remove('hidden');
+  document.getElementById('scr_duurReeksDetails').classList.add('hidden');
+  document.getElementById('scr_duurZelfDetails').classList.add('hidden');
+  document.querySelectorAll('input[name="scr_duurSnel"]').forEach(r=>r.checked=false);
+  document.querySelectorAll('#scr_duurSnelGrid .cb-item').forEach(el=>el.classList.remove('checked'));
+  ['scr_f_duurMin','scr_f_duurUur','scr_f_reeksAantal','scr_f_reeksDuur'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
 function scrToggleCe(id,on){document.getElementById(id).classList.toggle('hidden',!on);}
 function scrTogglePunten(){const m=document.querySelector('input[name="puntenM"]:checked')?.value;document.getElementById('puntenZelfBox').classList.toggle('hidden',m!=='zelf');}
 function scrOnGramChange(){document.querySelectorAll('.gr').forEach(el=>el.classList.toggle('sel',el.querySelector('input:checked')!==null));}
@@ -2792,7 +2893,7 @@ function scrGetBase(){
     lsd:        document.querySelector('input[name="scr_lsd"]:checked')?.value||'nee',
     opm:        document.getElementById('scr_f_opm').value.trim(),
     duurMode:   document.querySelector('input[name="scr_duurMode"]:checked')?.value||'duur',
-    duur:       document.getElementById('f_duur')?.value||'',
+    duur:       scrGetDuurTekst(),
     nOef:       document.getElementById('f_nOef')?.value||'',
     nItems:     document.getElementById('f_nItems')?.value||''
   };
@@ -2809,9 +2910,15 @@ function scrBouwPrompt(d,catNaam,subLijst,extra){
 
   let duurRegel='';
   if(!document.getElementById('scr_fcDuur').classList.contains('hidden')){
-    if(d.duurMode==='duur'&&d.duur) duurRegel=`\nDe les duurt ${d.duur}. Stem het aantal en type oefeningen automatisch af op deze duur en varieer de types.`;
-    else if(d.duurMode==='duur') duurRegel='\nStem het aantal en type oefeningen af op een gemiddelde les en varieer de types.';
-    else if(d.duurMode==='zelf') duurRegel=`\nMaak ${d.nOef||'een passend aantal'} oefeningen met elk ${d.nItems||'een passend aantal'} items per oefening.`;
+    // d.duur is een volledige zin met punt, bv. "30 minuten." of "Lessenreeks van 6 lessen."
+    if(d.duur) duurRegel=`\nDuur: ${d.duur}`;
+    if(d.duurMode==='zelf'){
+      duurRegel+=`\nMaak ${d.nOef||'een passend aantal'} oefeningen met elk ${d.nItems||'een passend aantal'} items per oefening.`;
+    } else {
+      duurRegel+= d.duur
+        ? ' Stem het aantal en type oefeningen automatisch af op deze duur en varieer de types.'
+        : '\nStem het aantal en type oefeningen af op een gemiddelde les en varieer de types.';
+    }
   }
 
 
@@ -2855,7 +2962,7 @@ function scrBouwPrompt(d,catNaam,subLijst,extra){
 
   return `Je bent taaldocent aan de VIVES Hogeschool.
 
-${VIVES}
+${scrVIVES}
 
 TAAL EN OPMAAK:
 ${L.inst}${acRegel}
@@ -3128,7 +3235,7 @@ function scrBouwRubricTekst(p,d){
   const opr=document.getElementById(`${p}opr`)?.value.trim()||'';
   const pRegel=(pnt==='ja'&&tot)?`Koppel punten aan de niveaus. Totaal: ${tot} punten.`:'Koppel geen punten aan de niveaus.';
   const oprRegel=opr?`\n  - Opdracht: ${opr}`:'';
-  return `Je bent taaldocent aan de VIVES Hogeschool.\n\n${VIVES}\n\nTAAL EN OPMAAK:\n${L.inst}${L.ac?'\n'+L.ac:''}\n\nINFOKADER:\n${L.ki}\n  - ${L.ti}: ${d.titel}\n  - ${L.od}: ${d.naam}\n  - ${L.bv}: ${d.groep}\n  - ${L.vk}: ${d.vak}\n  - ${L.nv}: ${d.niveau}\n\nRUBRIC:\nMaak een beoordelingsrubric voor ${et} met:\n  - Aantal niveaus: ${niv} (${scrNL[niv]})\n  - ${pRegel}\n  - Criteria: ${crit.join(', ')||'[selecteer criteria]'}${oprRegel}\n\nGenereer voor elk criterium op elk niveau een concrete beschrijvende zin in de tweede persoon enkelvoud (je/jouw). Vermijd vage termen. Voorbeeld bij Uitspraak / Uitstekend: "Je maakt geen enkele uitspraakfout en spreekt vlot en met een naturel accent."\n\nPresenteer als overzichtelijke tabel in VIVES-huisstijl.\n\n${L.bv2}`;
+  return `Je bent taaldocent aan de VIVES Hogeschool.\n\n${scrVIVES}\n\nTAAL EN OPMAAK:\n${L.inst}${L.ac?'\n'+L.ac:''}\n\nINFOKADER:\n${L.ki}\n  - ${L.ti}: ${d.titel}\n  - ${L.od}: ${d.naam}\n  - ${L.bv}: ${d.groep}\n  - ${L.vk}: ${d.vak}\n  - ${L.nv}: ${d.niveau}\n\nRUBRIC:\nMaak een beoordelingsrubric voor ${et} met:\n  - Aantal niveaus: ${niv} (${scrNL[niv]})\n  - ${pRegel}\n  - Criteria: ${crit.join(', ')||'[selecteer criteria]'}${oprRegel}\n\nGenereer voor elk criterium op elk niveau een concrete beschrijvende zin in de tweede persoon enkelvoud (je/jouw). Vermijd vage termen. Voorbeeld bij Uitspraak / Uitstekend: "Je maakt geen enkele uitspraakfout en spreekt vlot en met een naturel accent."\n\nPresenteer als overzichtelijke tabel in VIVES-huisstijl.\n\n${L.bv2}`;
 }
 
 function scrToonRubricInline(){
