@@ -267,7 +267,7 @@ textarea.remark::placeholder{color:#b1b1b1;font-style:italic;}
       <div class="fg"><label class="fl" for="scr_f_titel">2. Titel van het document</label><input type="text" id="scr_f_titel" placeholder="Bv. Leesoefening — De klimaatcrisis"></div>
     </div>
     <div class="two-col">
-      <div class="fg"><label class="fl" for="f_naam">3. Jouw naam</label><input type="text" id="f_naam" placeholder="Bv. Jan Janssen"></div>
+      <div class="fg"><label class="fl" for="scr_f_naam">3. Jouw naam</label><input type="text" id="scr_f_naam" placeholder="Bv. Jan Janssen"></div>
       <div class="fg"><label class="fl" for="scr_f_groep">4. Groep</label><input type="text" id="scr_f_groep" placeholder="Bv. 1 Bachelor Verpleegkunde"></div>
     </div>
     <div class="two-col">
@@ -2408,24 +2408,14 @@ function showOnlyScr(id) {
 }
 
 function openScrIVES(groep) {
-  // Prefill ScrIVES velden met groepsdata
-  ['scrS1','scrS2','scrS3'].forEach(s => {
-    const el = document.getElementById(s);
-    if (el) el.classList.add('hidden');
-  });
-  const s1 = document.getElementById('scrS1');
-  if (s1) s1.classList.remove('hidden');
-  // Toon scherm 4
+  scrActieveGroep = groep || null;
+  // Toon scherm 4, verberg de rest
   ['s0','s1','s2','s3','s4'].forEach(s => {
     const el = document.getElementById(s);
     if (el) el.classList.toggle('hidden', s !== 's4');
   });
-  // Prefill naam/groep/vak als de velden bestaan
-  setTimeout(() => {
-    const fn = document.getElementById('f_naam'); if (fn && groep && profiel) fn.value = profiel.naam || '';
-    const fg = document.getElementById('scr_f_groep'); if (fg && groep) fg.value = groep.groepsnaam || '';
-    const fv = document.getElementById('scr_f_vak'); if (fv && groep) fv.value = groep.vak || '';
-  }, 50);
+  // Start op de categoriekeuze (scrS1)
+  scrShowOnly('scrS1');
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -2532,6 +2522,7 @@ const scrVIVES_LOGO_HTML = `<div style="background:#efeee9;border-radius:8px;pad
 const scrVIVES=`Gebruik de VIVES-huisstijl:\n- Titels: Calibri 14pt, vet\n- Ondertitels: Calibri 12pt, vet\n- Lopende tekst: Calibri 11pt\n- Primaire kleuren: VIVES-rood (#e00020) en Zand (#efeee9)\n- Zwart (#1e1e1e) uitsluitend voor tekst`;
 
 let scrCurHC=null, scrCurSub=null;
+let scrActieveGroep=null;
 
 // ═══ NAVIGATIE ════════════════════════════════════════════════
 
@@ -2606,6 +2597,15 @@ function scrSetupForm(){
 
   // Reset form fields
   scrResetFields();
+
+  // Prefill met gegevens van de docent en de gekozen groep
+  if (scrActieveGroep) {
+    const fg = document.getElementById('scr_f_groep'); if (fg) fg.value = scrActieveGroep.groepsnaam || '';
+    const fv = document.getElementById('scr_f_vak');   if (fv) fv.value = scrActieveGroep.vak || '';
+  }
+  if (typeof profiel !== 'undefined' && profiel) {
+    const fn = document.getElementById('scr_f_naam'); if (fn) fn.value = profiel.naam || '';
+  }
 
   // Show/hide form sections
   const s=scrCurSub||{};
@@ -2684,7 +2684,7 @@ function scrSetupForm(){
 }
 
 function scrResetFields(){
-  ['scr_f_onderwerp','scr_f_titel','f_naam','scr_f_groep','scr_f_vak','scr_f_opm'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['scr_f_onderwerp','scr_f_titel','scr_f_naam','scr_f_groep','scr_f_vak','scr_f_opm'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('scr_f_niveau').value='';
   const _ft=document.getElementById('f_taal');if(_ft)_ft.value='';
   document.getElementById('taalNote').style.display='none';
@@ -2733,6 +2733,24 @@ function scrCbHTML(s,dataCat){
   return `<label class="cb-item"><input type="checkbox" value="${s}" ${dc} onchange="this.closest('.cb-item').classList.toggle('checked',this.checked)"> ${s}</label>`;
 }
 
+// Extra instructies voor invuloefeningen met woorden-/vertaalbank
+function scrBankInstructies(sel, taal){
+  let t='';
+  if(sel.includes('Invuloefening met woordenbank')){
+    t+='\n\nINVULOEFENING MET WOORDENBANK:\n'
+      +'Plaats boven de oefening een woordenbank met de in te vullen woorden in het '+taal+', in willekeurige volgorde door elkaar. '
+      +'Geef werkwoorden in de infinitief en bijvoeglijke naamwoorden in de basisvorm (mannelijk enkelvoud); de student vervoegt of stemt zelf af in de zin. '
+      +'In de zinnen zelf staat een genummerde invulplaats (……) waar het juiste woord uit de bank moet worden ingevuld.';
+  }
+  if(sel.includes('Invuloefening met vertaalbank')){
+    t+='\n\nINVULOEFENING MET VERTAALBANK:\n'
+      +'Plaats boven de oefening een vertaalbank met de in te vullen woorden in het Nederlands, in willekeurige volgorde door elkaar. '
+      +'Geef werkwoorden in de infinitief en bijvoeglijke naamwoorden in de basisvorm; de student vertaalt naar het '+taal+' en vervoegt of stemt zelf af in de zin. '
+      +'In de zinnen zelf staat een genummerde invulplaats (……) waar de juiste '+taal+'e vertaling moet worden ingevuld.';
+  }
+  return t;
+}
+
 // ═══ EVENT HANDLERS ═══════════════════════════════════════════
 
 function scrOnTaalChange(){const t=document.getElementById('f_taal').value;document.getElementById('taalNote').style.display=(t&&t!=='Nederlands')?'block':'none';}
@@ -2763,7 +2781,7 @@ function scrGetBase(){
   return{
     onderwerp:  document.getElementById('scr_f_onderwerp').value.trim(),
     titel:      document.getElementById('scr_f_titel').value.trim()      ||'[voeg titel in]',
-    naam:       document.getElementById('f_naam').value.trim()       ||'[voeg naam in]',
+    naam:       document.getElementById('scr_f_naam').value.trim()       ||'[voeg naam in]',
     groep:      document.getElementById('scr_f_groep').value.trim()      ||'[voeg groep in]',
     vak:        document.getElementById('scr_f_vak').value.trim()        ||'[voeg vak in]',
     niveau:     document.getElementById('scr_f_niveau').value            ||'[kies niveau]',
@@ -2872,6 +2890,7 @@ function scrGeneratePrompt(){
     let ex='\n  Genereer een volledige grammaticales: leg de regels uit met voldoende voorbeelden.';
     if(sel.length>0) ex+=`\n  Voeg de volgende oefenvormen toe: ${sel.join(', ')}.`;
     else ex+='\n  Voeg passende oefeningen toe.';
+    ex+=scrBankInstructies(sel, d.taal);
     generatedPrompt=scrBouwPrompt(d,'grammaticales — theorie met oefeningen',[],ex);
 
   } else if(scrCurSub.special==='gram-theorie'){
@@ -2886,6 +2905,7 @@ function scrGeneratePrompt(){
     const sel=[...document.querySelectorAll('#scr_subcatInhoud input[type="checkbox"]:checked')].map(i=>i.value);
     let ex='\n  ENKEL oefeningen — geen theoretische uitleg. De theorie staat in bijlage.';
     if(sel.length>0) ex+=`\n  Gebruik de volgende oefenvormen: ${sel.join(', ')}.`;
+    ex+=scrBankInstructies(sel, d.taal);
     generatedPrompt=scrBouwPrompt(d,'grammatica — oefeningen',[],ex);
 
   } else if(['les-plan','les-schema'].includes(scrCurSub.id)){
@@ -3017,6 +3037,9 @@ function scrGeneratePrompt(){
       }
       ex+=evalEx;
     }
+
+    // Specifieke instructies voor invuloefeningen met woorden-/vertaalbank
+    ex+=scrBankInstructies(sel, d.taal);
 
     generatedPrompt=scrBouwPrompt(d,scrCurSub.naam,sel,ex);
 
