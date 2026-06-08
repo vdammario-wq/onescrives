@@ -1,36 +1,48 @@
-const CACHE = 'onescrives-v2';
-const ASSETS = ['./index.html', './manifest.json'];
+// Service worker voor OneScrIVES
+// Verhoog CACHE_VERSIE bij elke nieuwe release zodat gebruikers de update krijgen.
+const CACHE_VERSIE = 'onescrives-v1';
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+const TE_CACHEN = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
+
+// Installeren: bestanden in de cache zetten
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_VERSIE).then(cache => cache.addAll(TE_CACHEN))
   );
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+// Activeren: oude caches opruimen
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(namen =>
+      Promise.all(
+        namen.filter(naam => naam !== CACHE_VERSIE)
+             .map(naam => caches.delete(naam))
+      )
+    )
   );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
-  if (e.request.mode === 'navigate') {
-    // Network-first voor navigatie (index.html altijd vers)
-    e.respondWith(
-      fetch(e.request)
-        .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(e.request))
-    );
-  } else {
-    // Cache-first voor overige assets
-    e.respondWith(
-      caches.match(e.request).then(r => r || fetch(e.request))
-    );
-  }
+// Ophalen: eerst netwerk, val terug op cache (network-first)
+// Zo zien gebruikers altijd de nieuwste versie als ze online zijn,
+// en blijft de app werken zonder internet.
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  event.respondWith(
+    fetch(event.request)
+      .then(respons => {
+        const kopie = respons.clone();
+        caches.open(CACHE_VERSIE).then(cache => cache.put(event.request, kopie));
+        return respons;
+      })
+      .catch(() => caches.match(event.request).then(r => r || caches.match('./index.html')))
+  );
 });
